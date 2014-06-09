@@ -1,0 +1,76 @@
+#!/bin/bash
+
+function parse_git_dirty () {
+    [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit (working directory clean)" ]] && echo "### WARNING: git is not Clean. ###"
+}
+function parse_git_branch () {
+    echo "Current branch is:"
+    git branch --no-color 2> /dev/null | sed -e '/^[^*]/d'
+    echo "Make sure your current branch is master when necessary."
+}
+
+HELPSTRING="
+Script for deployment \nwritten by Panlilu - panlilu@gmail.com \n\n
+
+Example:\n
+ \t   ./deploy test \n
+ \t   ./deploy test go \n
+ \t   ./deploy test backup \n
+ \t   ./deploy blocks \n
+ \t   ./deploy blocks go\n
+"
+echo "---------------"
+parse_git_branch
+parse_git_dirty
+echo "---------------"
+echo 
+echo
+
+if [ $# -eq 0 ] || [ $1 == "help" ]
+    then
+        echo -e $HELPSTRING;
+
+elif [ $1 == "test" ]
+    then
+        if [[ -z $2 ]]
+            then
+                echo "Running prepare and dry-run"
+                rsync -nav --progress --exclude-from=.rsync_exclude -e "ssh -p22" ./ root@test.bifubao.com:/home/bitcoind/insight/public
+        elif [ $2 == "go" ]
+            then
+                echo "Running actual deploy"
+                rsync -av --progress --exclude-from=.rsync_exclude -e "ssh -p22" ./ root@test.bifubao.com:/home/bitcoind/insight/public
+        elif [ $2 == "init" ]
+            then
+                echo "Running test initial"
+                ssh root@test.bifubao.com "cd /home/bitcoind/; mkdir backups"
+        elif [ $2 == "backup" ]
+            then 
+                echo "Running remote backup"
+                ssh root@test.bifubao.com "rsync -av /home/bitcoind/insight/ /home/bitcoind/backups/insight_backup_$(date +'%Y%m%d%H%M%S') --exclude='node_modules'"
+        else
+            echo -e $HELPSTRING;
+        fi
+elif [ $1 == "bitcoind" ]
+    then
+        if [[ -z $2 ]]
+            then
+                echo "Running prepare and dry-run"
+                rsync -nav --progress --exclude-from=.rsync_exclude -e "ssh -p22" ./ root@bitcoind.bifubao.com:/home/bitcoind/insight/public
+        elif [ $2 == "go" ]
+            then
+                echo "Running actual deploy"
+                rsync -av --progress --exclude-from=.rsync_exclude -e "ssh -p22" ./ root@bitcoind.bifubao.com:/home/bitcoind/insight/public
+        elif [ $2 == "init" ]
+            then
+                echo "Running bitcoind initial"
+                ssh root@bitcoind.bifubao.com "cd /home/bitcoind/; mkdir backups"
+        elif [ $2 == "backup" ]
+            then 
+                echo "Running remote backup"
+                ssh root@bitcoind.bifubao.com "rsync -av /home/bitcoind/insight/ /home/bitcoind/backups/insight_backup_$(date +'%Y%m%d%H%M%S') --exclude='node_modules'"
+        else
+            echo -e $HELPSTRING;
+        fi
+fi
+

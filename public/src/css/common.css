@@ -207,6 +207,14 @@ margin-left: 0;
   padding-left: 25px;
 }
 
+.loader-gif {
+  display: inline-block;
+  width: 16px;
+  height: 11px;
+  background: transparent url(../img/loading.gif) no-repeat;
+  margin-left: 5px;
+}
+
 #search::-webkit-input-placeholder {
   color: #BCDF7E;
   font-family: 'Ubuntu', sans-serif;
@@ -637,7 +645,7 @@ margin-left: 0;
   height: 45px;
 }
 #powered a.bitcore {
-  background-image: url('http://bitcore.io/images/logo.svg');
+  background-image: url('/img/bitcore.svg');
   background-size: 80px;
   width: 30%;
 }
@@ -737,3 +745,6 @@ a.v_highlight_more {
   margin-top: 15px;
 }
 
+@media (min-width: 768px) {
+  #search { color: #fff; }
+}
